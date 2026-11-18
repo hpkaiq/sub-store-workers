@@ -404,6 +404,29 @@ function consumeShareToken(query) {
     return nextToken;
 }
 
+function consumeShareTokenForRequest(req, type) {
+    const query = {
+        token: req.query?.token,
+        type,
+        name: req.params?.name,
+    };
+    const consumedToken = req.subStoreShareToken;
+    if (
+        consumedToken &&
+        consumedToken.token === query.token &&
+        consumedToken.type === query.type &&
+        consumedToken.name === query.name
+    ) {
+        return consumedToken;
+    }
+
+    const token = consumeShareToken(query);
+    if (token) {
+        req.subStoreShareToken = token;
+    }
+    return token;
+}
+
 function findShareToken(query) {
     const allTokens = $.read(TOKENS_KEY) || [];
     return (
@@ -426,4 +449,10 @@ function shouldArchiveDeletion(mode) {
     );
 }
 
-export { createTokenItem, deleteTokenItem, consumeShareToken, findShareToken };
+export {
+    createTokenItem,
+    deleteTokenItem,
+    consumeShareToken,
+    consumeShareTokenForRequest,
+    findShareToken,
+};

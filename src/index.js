@@ -140,6 +140,7 @@ export default {
 
             // /share/ 路由的 token 验证（与上游 Node.js 版 be_merge 行为一致）
             // 所有 /share/ 请求都必须携带有效 token，未分享的订阅/文件不可直接访问
+            let shareToken;
             if (pathname.startsWith('/share/')) {
                 if (request.method.toUpperCase() !== 'GET') {
                     return new Response(JSON.stringify({ status: 'failed', message: 'Method not allowed' }), {
@@ -156,7 +157,7 @@ export default {
                     });
                 }
                 const decodedPathname = decodeURIComponent(pathname);
-                const shareToken = consumeShareToken({
+                shareToken = consumeShareToken({
                     token: tokenValue,
                     pathname: decodedPathname,
                 });
@@ -180,7 +181,7 @@ export default {
             }
 
             // 路由分发
-            const response = await $app.handleRequest(request);
+            const response = await $app.handleRequest(request, shareToken);
 
             // 禁止 Cloudflare CDN/边缘节点缓存动态 API 响应
             // 未设置此头时，不同 URL 路径（如 /share/ 和 /download/）的响应可能被独立缓存，

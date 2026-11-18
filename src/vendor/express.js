@@ -59,7 +59,7 @@ export default function express({ substore: $ }) {
     app.start = () => {};
 
     /** 处理请求 */
-    app.handleRequest = async (request) => {
+    app.handleRequest = async (request, subStoreShareToken) => {
         // CORS 预检已在 index.js 外层处理，此处直接进入路由
 
         const url = new URL(request.url);
@@ -69,6 +69,9 @@ export default function express({ substore: $ }) {
         url.searchParams.forEach((value, key) => {
             query[key] = value;
         });
+        if (subStoreShareToken) {
+            query.token = subStoreShareToken.token;
+        }
 
         // 解析请求体
         let body = null;
@@ -104,6 +107,7 @@ export default function express({ substore: $ }) {
             params: {},
             headers,
             body,
+            subStoreShareToken,
             _parsedUrl: { pathname: path },
         };
 
